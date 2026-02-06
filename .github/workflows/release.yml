@@ -1,4 +1,4 @@
-name: Release & Publish to NPM
+name: Publish to NPM
 
 on:
   release:
@@ -6,11 +6,11 @@ on:
       - published
 
 permissions:
-  id-token: write
   contents: read
+  id-token: write
 
 jobs:
-  release:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,12 +18,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Release
-        run: npm run release
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
