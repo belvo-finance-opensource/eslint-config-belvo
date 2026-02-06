@@ -11,13 +11,13 @@ Shareable ESLint config for Belvo FE projects.
    Run this command to check which packages and versions you need:
 
    ```sh
-   npm info "@belvo/eslint-config@latest" peerDependencies
+   npm info "@belvo/eslint-config-belvo@latest" peerDependencies
    ```
 
    The easiest way is:
 
    ```sh
-   npx install-peerdeps --dev @belvo/eslint-config
+   npx install-peerdeps --dev @belvo/eslint-config-belvo
    ```
 
 2. **Configure ESLint**
@@ -26,7 +26,7 @@ Shareable ESLint config for Belvo FE projects.
 
       ```js
       // eslint.config.js
-      import belvoConfig from "@belvo/eslint-config";
+      import belvoConfig from "@belvo/eslint-config-belvo";
       export default belvoConfig;
       ```
 
@@ -49,7 +49,7 @@ If you wish to use custom rules included in this package (in `eslint-custom-rule
 
 - To see current peers required:
   ```sh
-  npm info "@belvo/eslint-config@latest" peerDependencies
+  npm info "@belvo/eslint-config-belvo@latest" peerDependencies
   ```
 
 - To interactively update your dependencies:
