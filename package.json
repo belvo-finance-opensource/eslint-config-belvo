@@ -15,6 +15,9 @@
     "eslint.config.js",
     "eslint-custom-rules"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "check-dependencies": "npx npm-check-updates --target=latest --interactive",
     "lint": "eslint .",
