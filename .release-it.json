@@ -7,9 +7,6 @@
     "tag": false,
     "push": false
   },
-  "hooks": {
-    "before:init": ["npm run lint"]
-  },
   "npm": {
     "publish": true,
     "ignoreVersion": true,
