@@ -37,6 +37,7 @@ export default defineConfigWithVueTs(
         },
         rules: {
             'no-unused-vars': 'off',
+            'no-unused-expressions': 'off',
             '@stylistic/indent': ['error', 2],
             '@stylistic/quotes': ['error', 'single'],
             '@stylistic/array-bracket-spacing': ['error', 'never'],
@@ -80,12 +81,13 @@ export default defineConfigWithVueTs(
             '@typescript-eslint/no-explicit-any': 'warn',
             'no-console': ['error', { allow: ['warn', 'error'] }],
             'custom/kebab-case-attribute-value': 'error',
-            'no-unused-expressions': [
-              'error',
-              {
-                'allowShortCircuit': true,
-                'allowTernary': true
-              }
+            '@typescript-eslint/no-unused-expressions': [
+                'error',
+                {
+                  allowShortCircuit: true,
+                  allowTernary: true,
+                  allowTaggedTemplates: true
+                }
             ]
         }
     },
