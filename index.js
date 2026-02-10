@@ -79,7 +79,14 @@ export default defineConfigWithVueTs(
             ],
             '@typescript-eslint/no-explicit-any': 'warn',
             'no-console': ['error', { allow: ['warn', 'error'] }],
-            'custom/kebab-case-attribute-value': 'error'
+            'custom/kebab-case-attribute-value': 'error',
+            'no-unused-expressions': [
+              'error',
+              {
+                'allowShortCircuit': true,
+                'allowTernary': true
+              }
+            ]
         }
     },
     eslintConfigPrettier,
