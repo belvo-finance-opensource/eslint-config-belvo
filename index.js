@@ -93,6 +93,12 @@ export default defineConfigWithVueTs(
         }
     },
     eslintConfigPrettier,
+    {
+      name: 'app/curly-after-prettier',
+      rules: {
+        curly: 'error'
+      }
+    },
     packageJson.configs.recommended,
     {
         rules: {
