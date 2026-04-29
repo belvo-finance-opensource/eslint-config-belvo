@@ -36,6 +36,7 @@ export default defineConfigWithVueTs(
             'package-json': packageJson
         },
         rules: {
+            curly: 'error',
             'no-unused-vars': 'off',
             'no-unused-expressions': 'off',
             '@stylistic/indent': ['error', 2],
@@ -96,6 +97,8 @@ export default defineConfigWithVueTs(
     {
         rules: {
             'package-json/specify-peers-locally': 'off',
+            'package-json/require-sideEffects': 'off',
+            'package-json/require-repository': 'off',
             'package-json/restrict-dependency-ranges': [
                 'error',
                 {
