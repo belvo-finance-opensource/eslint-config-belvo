@@ -36,6 +36,7 @@ export default defineConfigWithVueTs(
             'package-json': packageJson
         },
         rules: {
+            curly: 'error',
             'no-unused-vars': 'off',
             'no-unused-expressions': 'off',
             '@stylistic/indent': ['error', 2],
