@@ -97,6 +97,8 @@ export default defineConfigWithVueTs(
     {
         rules: {
             'package-json/specify-peers-locally': 'off',
+            'package-json/require-sideEffects': 'off',
+            'package-json/require-repository': 'off',
             'package-json/restrict-dependency-ranges': [
                 'error',
                 {
