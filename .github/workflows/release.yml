@@ -21,12 +21,19 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
+          node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
+          scope: '@belvo'
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify npm authentication
+        run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish to NPM
-        run: npm publish
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
