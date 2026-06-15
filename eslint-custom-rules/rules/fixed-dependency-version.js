@@ -7,7 +7,8 @@ const DEPENDENCY_TYPES = [
   'dependencies',
   'devDependencies',
   'optionalDependencies',
-  'peerDependencies'
+  'peerDependencies',
+  'overrides'
 ]
 
 const PACKAGE_JSON_PATTERN = /(?:^|[/\\])package\.json$/
@@ -73,7 +74,7 @@ export default {
       }
     ],
     messages: {
-      mustBeFixed: 'Dependency "{{name}}" must use a fixed version (e.g. "1.2.3"), not a range like "{{version}}".'
+      mustBeFixed: '"{{name}}" must use a fixed version (e.g. "1.2.3"), not a range like "{{version}}".'
     }
   },
 
@@ -86,6 +87,56 @@ export default {
     const options = context.options[0] ?? {}
     const dependencyTypes = options.forDependencyTypes ?? DEPENDENCY_TYPES
 
+    function reportInvalidVersion(name, versionNode) {
+      context.report({
+        node: versionNode,
+        messageId: 'mustBeFixed',
+        data: {
+          name,
+          version: versionNode.value
+        }
+      })
+    }
+
+    function checkOverridesObject(objectNode, namePrefix) {
+      for (const property of objectNode.properties) {
+        if (!isJSONStringLiteral(property.key)) {
+          continue
+        }
+
+        const key = property.key.value
+        const name = namePrefix ? `${namePrefix}.${key}` : key
+
+        if (isJSONStringLiteral(property.value)) {
+          if (!isFixedVersion(property.value.value)) {
+            reportInvalidVersion(`overrides.${name}`, property.value)
+          }
+          continue
+        }
+
+        if (property.value.type === 'JSONObjectExpression') {
+          checkOverridesObject(property.value, name)
+        }
+      }
+    }
+
+    function checkFlatDependencies(objectNode) {
+      for (const property of objectNode.properties) {
+        if (!isJSONStringLiteral(property.key) || !isJSONStringLiteral(property.value)) {
+          continue
+        }
+
+        const name = property.key.value
+        const version = property.value.value
+
+        if (isFixedVersion(version)) {
+          continue
+        }
+
+        reportInvalidVersion(name, property.value)
+      }
+    }
+
     return {
       'Program > JSONExpressionStatement > JSONObjectExpression > JSONProperty[key.type=JSONLiteral][value.type=JSONObjectExpression]'(
         node
@@ -96,27 +147,12 @@ export default {
           return
         }
 
-        for (const property of node.value.properties) {
-          if (!isJSONStringLiteral(property.key) || !isJSONStringLiteral(property.value)) {
-            continue
-          }
-
-          const name = property.key.value
-          const version = property.value.value
-
-          if (isFixedVersion(version)) {
-            continue
-          }
-
-          context.report({
-            node: property.value,
-            messageId: 'mustBeFixed',
-            data: {
-              name,
-              version
-            }
-          })
+        if (dependencyType === 'overrides') {
+          checkOverridesObject(node.value, '')
+          return
         }
+
+        checkFlatDependencies(node.value)
       }
     }
   }
