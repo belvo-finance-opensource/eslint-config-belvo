@@ -7,6 +7,7 @@ import unusedImports from 'eslint-plugin-unused-imports'
 import noOnlyTests from 'eslint-plugin-no-only-tests'
 import customEslintRules from './eslint-custom-rules/index.js'
 import packageJson from 'eslint-plugin-package-json'
+import parserJsonc from 'jsonc-eslint-parser'
 
 export default defineConfigWithVueTs(
     {
@@ -105,13 +106,20 @@ export default defineConfigWithVueTs(
             'package-json/specify-peers-locally': 'off',
             'package-json/require-sideEffects': 'off',
             'package-json/require-repository': 'off',
-            'package-json/restrict-dependency-ranges': [
-                'error',
-                {
-                    forDependencyTypes: ['devDependencies', 'dependencies'],
-                    rangeType: 'pin'
-                }
-            ]
+            'package-json/restrict-dependency-ranges': 'off'
+        }
+    },
+    {
+        name: 'app/package-json-custom-rules',
+        files: ['**/package.json'],
+        languageOptions: {
+            parser: parserJsonc
+        },
+        plugins: {
+            custom: customEslintRules
+        },
+        rules: {
+            'custom/fixed-dependency-version': 'error'
         }
     }
 )

@@ -1,4 +1,5 @@
 import kebabCaseAttributeValue from './rules/kebab-case-attribute-value.js'
+import fixedDependencyVersion from './rules/fixed-dependency-version.js'
 
 const plugin = {
   meta: {
@@ -7,7 +8,8 @@ const plugin = {
     namespace: 'custom'
   },
   rules: {
-    'kebab-case-attribute-value': kebabCaseAttributeValue
+    'kebab-case-attribute-value': kebabCaseAttributeValue,
+    'fixed-dependency-version': fixedDependencyVersion
   }
 }
 
