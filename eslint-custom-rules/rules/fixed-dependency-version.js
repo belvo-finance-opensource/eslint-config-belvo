@@ -22,6 +22,13 @@ function isJSONStringLiteral(node) {
 }
 
 /**
+ * Returns true when the version is a caret semver range (e.g. ^1.2.3).
+ */
+function isCaretVersion(version) {
+  return /^\^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$/.test(version)
+}
+
+/**
  * Returns true when the version is an exact semver (no ranges like ^, ~, >=).
  */
 function isFixedVersion(version) {
@@ -54,7 +61,8 @@ export default {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require fixed (exact) versions for package.json dependencies',
+      description:
+        'Require fixed (exact) versions for package.json dependencies; peerDependencies may use caret ranges (^)',
       category: 'Best Practices',
       recommended: false
     },
@@ -74,7 +82,9 @@ export default {
       }
     ],
     messages: {
-      mustBeFixed: '"{{name}}" must use a fixed version (e.g. "1.2.3"), not a range like "{{version}}".'
+      mustBeFixed: '"{{name}}" must use a fixed version (e.g. "1.2.3"), not a range like "{{version}}".',
+      peerMustBeFixedOrCaret:
+        '"{{name}}" must use a fixed version (e.g. "1.2.3") or a caret range (e.g. "^1.2.3"), not "{{version}}".'
     }
   },
 
@@ -87,15 +97,23 @@ export default {
     const options = context.options[0] ?? {}
     const dependencyTypes = options.forDependencyTypes ?? DEPENDENCY_TYPES
 
-    function reportInvalidVersion(name, versionNode) {
+    function reportInvalidVersion(name, versionNode, dependencyType) {
       context.report({
         node: versionNode,
-        messageId: 'mustBeFixed',
+        messageId: dependencyType === 'peerDependencies' ? 'peerMustBeFixedOrCaret' : 'mustBeFixed',
         data: {
           name,
           version: versionNode.value
         }
       })
+    }
+
+    function isValidVersion(version, dependencyType) {
+      if (dependencyType === 'peerDependencies') {
+        return isFixedVersion(version) || isCaretVersion(version)
+      }
+
+      return isFixedVersion(version)
     }
 
     function checkOverridesObject(objectNode, namePrefix) {
@@ -109,7 +127,7 @@ export default {
 
         if (isJSONStringLiteral(property.value)) {
           if (!isFixedVersion(property.value.value)) {
-            reportInvalidVersion(`overrides.${name}`, property.value)
+            reportInvalidVersion(`overrides.${name}`, property.value, 'overrides')
           }
           continue
         }
@@ -120,7 +138,7 @@ export default {
       }
     }
 
-    function checkFlatDependencies(objectNode) {
+    function checkFlatDependencies(objectNode, dependencyType) {
       for (const property of objectNode.properties) {
         if (!isJSONStringLiteral(property.key) || !isJSONStringLiteral(property.value)) {
           continue
@@ -129,11 +147,11 @@ export default {
         const name = property.key.value
         const version = property.value.value
 
-        if (isFixedVersion(version)) {
+        if (isValidVersion(version, dependencyType)) {
           continue
         }
 
-        reportInvalidVersion(name, property.value)
+        reportInvalidVersion(name, property.value, dependencyType)
       }
     }
 
@@ -152,7 +170,7 @@ export default {
           return
         }
 
-        checkFlatDependencies(node.value)
+        checkFlatDependencies(node.value, dependencyType)
       }
     }
   }
