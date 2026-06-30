@@ -29,6 +29,33 @@ function isCaretVersion(version) {
 }
 
 /**
+ * Returns true when the version is a >= semver range (e.g. >=14, >=0.2, >=5.0.0).
+ */
+function isGteVersion(version) {
+  return /^>=\d+(?:\.\d+)?(?:\.\d+)?(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$/.test(version)
+}
+
+/**
+ * Returns true when the version is valid for peerDependencies.
+ * Allows exact versions, caret ranges, >= ranges, and || combinations of those.
+ */
+function isValidPeerDependencyVersion(version) {
+  if (isFixedVersion(version)) {
+    return true
+  }
+
+  const parts = version.split('||').map((part) => part.trim())
+
+  if (parts.length === 0 || parts.some((part) => part.length === 0)) {
+    return false
+  }
+
+  return parts.every(
+    (part) => isFixedVersion(part) || isCaretVersion(part) || isGteVersion(part)
+  )
+}
+
+/**
  * Returns true when the version is an exact semver (no ranges like ^, ~, >=).
  */
 function isFixedVersion(version) {
@@ -62,7 +89,7 @@ export default {
     type: 'problem',
     docs: {
       description:
-        'Require fixed (exact) versions for package.json dependencies; peerDependencies may use caret ranges (^)',
+        'Require fixed (exact) versions for package.json dependencies; peerDependencies may use semver ranges (^, >=, ||)',
       category: 'Best Practices',
       recommended: false
     },
@@ -83,8 +110,8 @@ export default {
     ],
     messages: {
       mustBeFixed: '"{{name}}" must use a fixed version (e.g. "1.2.3"), not a range like "{{version}}".',
-      peerMustBeFixedOrCaret:
-        '"{{name}}" must use a fixed version (e.g. "1.2.3") or a caret range (e.g. "^1.2.3"), not "{{version}}".'
+      peerInvalidRange:
+        '"{{name}}" must use a valid peer dependency range (fixed version, ^, >=, or || combinations), not "{{version}}".'
     }
   },
 
@@ -100,7 +127,7 @@ export default {
     function reportInvalidVersion(name, versionNode, dependencyType) {
       context.report({
         node: versionNode,
-        messageId: dependencyType === 'peerDependencies' ? 'peerMustBeFixedOrCaret' : 'mustBeFixed',
+        messageId: dependencyType === 'peerDependencies' ? 'peerInvalidRange' : 'mustBeFixed',
         data: {
           name,
           version: versionNode.value
@@ -110,7 +137,7 @@ export default {
 
     function isValidVersion(version, dependencyType) {
       if (dependencyType === 'peerDependencies') {
-        return isFixedVersion(version) || isCaretVersion(version)
+        return isValidPeerDependencyVersion(version)
       }
 
       return isFixedVersion(version)
