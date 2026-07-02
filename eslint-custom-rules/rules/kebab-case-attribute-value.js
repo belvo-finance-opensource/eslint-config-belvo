@@ -29,7 +29,7 @@ export default {
 
     const toKebabCase = (str) => str.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)
 
-    function defineTemplateBodyVisitor(context, templateBodyVisitor, scriptVisitor, options) {
+    const defineTemplateBodyVisitor = (context, templateBodyVisitor, scriptVisitor, options) => {
       const sourceCode = context.getSourceCode()
       if (sourceCode.parserServices.defineTemplateBodyVisitor == null) {
         const filename = context.getFilename()
@@ -49,8 +49,7 @@ export default {
       )
     }
 
-    // Report the issue with the node
-    function reportIssue(node, name) {
+    const reportIssue = (node, name) => {
       const text = sourceCode.getText(node.key)
 
       context.report({
@@ -70,21 +69,14 @@ export default {
       })
     }
 
-    // Helper function to determine if an attribute is a valid data-* attribute and if it needs fixing
-    function isValidDataAttribute(name) {
-      return typeof name === 'string' && name.startsWith('data-')
-    }
-    function isInKebabCase(value) {
-      // Kebab-case: lowercase with hyphens
-      return /^[a-z0-9-]+$/.test(value)
-    }
+    const isValidDataAttribute = (name) => typeof name === 'string' && name.startsWith('data-')
 
-    // Define the visitor for `VAttribute` nodes in Vue templates
+    const isInKebabCase = (value) => /^[a-z0-9-]+$/.test(value)
+
     return defineTemplateBodyVisitor(context, {
       VAttribute(node) {
         const name = node.key.name
         const value = node.value && node.value.value
-        // If it's a data-* attribute, and its value is not in kebab-case, report it
         if (isValidDataAttribute(name)) {
           if (value && !isInKebabCase(value)) {
             reportIssue(node, value)

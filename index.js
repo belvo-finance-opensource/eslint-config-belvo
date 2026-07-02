@@ -82,6 +82,27 @@ export default defineConfigWithVueTs(
             ],
             '@typescript-eslint/no-explicit-any': 'warn',
             'no-console': ['error', { allow: ['warn', 'error'] }],
+            'func-style': ['error', 'expression', { allowArrowFunctions: true }],
+            'prefer-arrow-callback': ['error', { allowNamedFunctions: false }],
+            'no-restricted-syntax': [
+                'error',
+                {
+                    selector: 'FunctionDeclaration',
+                    message: 'Use arrow functions assigned to const instead: const name = () => {}'
+                },
+                {
+                    selector: 'ExportDefaultDeclaration > FunctionDeclaration',
+                    message: 'Use arrow functions assigned to const instead: const name = () => {}'
+                },
+                {
+                    selector: 'VariableDeclaration[kind!="const"] > VariableDeclarator > ArrowFunctionExpression',
+                    message: 'Assign arrow functions to const instead: const name = () => {}'
+                },
+                {
+                    selector: 'VariableDeclarator > FunctionExpression',
+                    message: 'Use arrow functions assigned to const instead: const name = () => {}'
+                }
+            ],
             'custom/kebab-case-attribute-value': 'error',
             '@typescript-eslint/no-unused-expressions': [
                 'error',
